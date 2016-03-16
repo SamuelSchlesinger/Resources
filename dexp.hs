@@ -1,25 +1,25 @@
-data Exp = A Exp Exp
-         | M Exp Exp
-         | S String
-         | D Double
+data Exp = A Exp Exp -- Addition
+         | M Exp Exp -- Multiplication
+         | S String  -- Variables
+         | D Double  -- Values
          deriving (Show)
 
 d :: String -> Exp -> Exp --- d x a = da/dx
-clean :: Exp -> Exp       --- cleans up expressions
+clean :: Exp -> Exp       --- Cleans up expressions
 
-d x (A a b) = A (d x a) (d x b)
-d x (M a b) = A (M (d x a) b) (M a (d x b))
-d x (S n) | (x == n)  = D 1.0
-          | otherwise = D 0.0
-d x (D _) = D 0.0
+d x (A a b) = A (d x a) (d x b)             -- derivative is linear
+d x (M a b) = A (M (d x a) b) (M a (d x b)) -- product rule
+d x (S n) | (x == n)  = D 1.0               -- dx/dx = 1
+          | otherwise = D 0.0               -- dy/dx = 0 assuming y independent of x
+d x (D _) = D 0.0                           -- for all r in R dr/dx = 0
 
 ---------------------------------------------------
 
-clean (A a (D 0.0)) = clean a
-clean (A (D 0.0) b) = clean b
-clean (M a (D 1.0)) = clean a
-clean (M (D 1.0) b) = clean b
-clean (M a b) = M (clean a) (clean b)
-clean (A a b) = A (clean a) (clean b)
-clean (D d) = D d
-clean (S s) = S s
+clean (A a (D 0.0)) = clean a               -- a + 0 = a 
+clean (A (D 0.0) b) = clean b               -- 0 + b = b
+clean (M a (D 1.0)) = clean a               -- a * 1 = a
+clean (M (D 1.0) b) = clean b               -- 1 * b = b
+clean (M a b) = M (clean a) (clean b)       -- recursively clean 
+clean (A a b) = A (clean a) (clean b)       -- "
+clean (D d) = D d                           -- leave alone
+clean (S s) = S s                           -- "
