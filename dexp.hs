@@ -32,5 +32,40 @@ clean (D d) = D d                           -- leave alone
 clean (S s) = S s                           -- "
 
 ---------------------------------------------------
---TODO--
--- eval :: [(String, Double)] -> Exp -> Exp -- evaluates expressions
+
+eval :: [(String, Double)] -> Exp -> Exp -- evaluates over an environment
+
+eval env (A (D a) (D b)) = D (a + b) -- if we have values, use them!
+eval env (M (D a) (D b)) = D (a * b) -- "
+
+eval env (A (S a) (S b)) = case (lookup a env) of
+                               Just v -> case (lookup b env) of
+                                             Just w -> D (v + w)
+                                             Nothing -> A (D v) (S b)
+                               Nothing -> case (lookup b env) of
+                                             Just w -> A (S a) (D w)
+                                             Nothing -> A (S a) (S b)
+
+eval env (M (S a) (S b)) = case (lookup a env) of
+                               Just v -> case (lookup b env) of
+                                             Just w -> D (v * w)
+                                             Nothing -> M (D v) (S b)
+                               Nothing -> case (lookup b env) of
+                                             Just w -> M (S a) (D w)
+                                             Nothing -> M (S a) (S b)
+
+eval env (A (S a) (D b)) = case (lookup a env) of 
+                               Just v -> D (v + b)
+                               Nothing -> A (S a) (D b)
+eval env (A (D a) (S b)) = case (lookup b env) of
+                               Just v -> D (a + v)
+                               Nothing -> A (D a) (S b)
+eval env (M (S a) (D b)) = case (lookup a env) of
+                               Just v -> D (v * b)
+                               Nothing -> M (S a) (D b)
+eval env (M (D a) (S b)) = case (lookup b env) of
+                               Just v -> D (a * v)
+                               Nothing -> M (D a) (S b)
+
+eval env (A a b) = eval env (A (eval env a) (eval env b)) -- base case
+eval env (M a b) = eval env (M (eval env a) (eval env b)) -- "
