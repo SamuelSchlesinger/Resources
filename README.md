@@ -1,1 +1,3 @@
 # Resources 
+
+First Haskell program
