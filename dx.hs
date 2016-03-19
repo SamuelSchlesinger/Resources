@@ -18,10 +18,24 @@ instance Show Exp where
     show (S n) = n
     show (D d) = show d
 
+instance Eq Exp where
+    (A a b) == (A c d) = (a == c && b == d) || (a == d && b == c)
+    (M a b) == (M c d) = (a == c && b == d) || (a == d && b == c)
+    (D d) == (D d') = d == d'
+    (S s) == (S s') = s == s'
+    (x) == (y) = False
+
+instance Num Exp where
+    a + b = A a b
+    a * b = M a b
+    a - b = A a (M (D (-1)) b)
+    abs a = a -- don't use :(
+    signum a = a -- don't use! 
+    fromInteger x = D (fromIntegral x :: Double) -- use if you DARE 
+
 ---------------------------------------------------
 
 clean :: Exp -> Exp       --- cleans up expressions
-
 clean (A a (D 0.0)) = clean a               -- a + 0 = a 
 clean (A (D 0.0) b) = clean b               -- 0 + b = b
 clean (M a (D 1.0)) = clean a               -- a * 1 = a
@@ -29,15 +43,31 @@ clean (M (D 1.0) b) = clean b               -- 1 * b = b
 clean (M a (D 0.0)) = (D 0.0)               -- a * 0 = 0
 clean (M (D 0.0) b) = (D 0.0)               -- 0 * a = 0
 clean (M a b) = M (clean a) (clean b)       -- recursively clean 
-clean (A a b) = A (clean a) (clean b)       -- "
+clean (A a b) 
+              | a == b = M (D 2) (clean a)  
+              | otherwise = A (clean a) (clean b)
 clean (D d) = D d                           -- leave alone
 clean (S s) = S s                           -- "
 
+fullclean :: Exp -> Exp
+fullclean a = fullclean_cheat a (clean a)
+              where
+                fullclean_cheat a a' = case (a == a') of
+                  True -> a
+                  False -> fullclean_cheat a' (clean a')
+    
 -- WARNING: you may have to clean a few times
 
 ---------------------------------------------------
 
+-- THIS IS BROKEN -- Infinite loop dawg
+
 eval :: [(String, Double)] -> Exp -> Exp -- evaluates over an environment
+
+eval env (D d) = (D d)
+eval env (S s) = case (lookup s env) of
+                     Just v -> D v
+                     Nothing -> S s
 
 eval env (A (D a) (D b)) = D (a + b) -- if we have values, use them!
 eval env (M (D a) (D b)) = D (a * b) -- "
@@ -73,3 +103,9 @@ eval env (M (D a) (S b)) = case (lookup b env) of -- value variable mult
 
 eval env (A a b) = eval env (A (eval env a) (eval env b)) -- base case
 eval env (M a b) = eval env (M (eval env a) (eval env b)) -- "
+
+---------------------------------------------------
+
+pow :: Exp -> Int -> Exp
+pow a 1 = a
+pow a n = (M a (pow a (n - 1)))  
