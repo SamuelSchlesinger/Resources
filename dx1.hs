@@ -1,4 +1,5 @@
--- work in progress
+-- work in progress -- kinda bloated I feel like, haven't tested it on much out of fear,
+-- though I believe it should work on at least a variety of functions
 data E = Add E E          -- a + b 
        | Mul E E          -- a * b
        | Neg E            -- (-a)
