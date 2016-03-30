@@ -1,6 +1,32 @@
 """
 
+Deterministic Finite Automata
+-----------------------------
+Very general, add a transition with += and add
+frozensets, lists, or hashables to the accept
+list with *=. The following example recognizes
+proper binary addition.
+
+
 d = DFA()
+
+d.start = "start"
+d *= ["good", "start"]
+
+d += ("start", ('0', '1', '1'), "good")
+d += ("start", ('1', '0', '1'), "good")
+d += ("start", ('1', '1', '0'), "carry")
+d += ("start", ('0', '0', '0'), "good")
+
+d += ("carry", ('1', '0', '0'), "carry")
+d += ("carry", ('0', '1', '0'), "carry")
+d += ("carry", ('0', '0', '1'), "good")
+d += ("carry", ('1', '1', '1'), "carry")
+
+d += ("good", ('1', '0', '1'), "good")
+d += ("good", ('0', '1', '1'), "good")
+d += ("good", ('1', '1', '0'), "carry")
+d += ("good", ('0', '0', '0'), "good")
 
 """
 
