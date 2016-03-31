@@ -11,7 +11,7 @@ proper binary addition.
 d = DFA()
 
 d.start = "start"
-d *= ["good", "start"]
+d *= ["good", "start"] # yeah this is weird i know
 
 d += ("start", ('0', '1', '1'), "good")
 d += ("start", ('1', '0', '1'), "good")
